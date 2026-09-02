@@ -1,26 +1,29 @@
-{      
-         "name": "vercel-proxy",
-         "version": "1.0.0",       
-         "description": "High-performance Serverless proxy for Vercel deployments on Tencent Cloud",       
-         "main": "index.js",       
-         "scripts": {       
-           "deploy": "sls deploy",       
-           "remove": "sls remove"       
-         },       
-         "repository": {       
-           "type": "git",       
-           "url": "git+https://github.com/luckylew23/vercel-proxy.git"       
-         },       
-         "keywords": [       
-           "vercel",       
-           "proxy",       
-           "tencent-cloud",       
-           "scf",       
-           "serverless"       
-         ],      
-         "author": "luckylew23-Mila",       
-         "license": "MIT",       
-         "devDependencies": {       
-           "serverless-tencent": "^3.1.0"       
-         }  
-      }
+{
+  "name": "vercel-proxy",
+  "version": "1.0.0",
+  "description": "Pure API proxy for Vercel, deployed on Tencent Cloud SCF (Node.js 12.16)",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "sls deploy",
+    "remove": "sls remove"
+  },
+  "engines": {
+    "node": ">=12.16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luckylew23/vercel-proxy.git"
+  },
+  "keywords": [
+    "vercel",
+    "proxy",
+    "tencent-cloud",
+    "scf",
+    "serverless"
+  ],
+  "author": "luckylew23-Mila",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless-tencent": "^3.1.0"
+  }
+}
