@@ -1,29 +1,11 @@
 {
-  "name": "vercel-proxy",
+  "name": "scf-api-proxy",
   "version": "1.0.0",
-  "description": "Pure API proxy for Vercel, deployed on Tencent Cloud SCF (Node.js 12.16)",
+  "description": "极简零依赖 API 代理，适配腾讯云函数（SCF）事件函数 + API 网关，基于 Node 18+ 原生 fetch",
   "main": "index.js",
-  "scripts": {
-    "deploy": "sls deploy",
-    "remove": "sls remove"
-  },
+  "private": true,
   "engines": {
-    "node": ">=12.16"
+    "node": ">=18"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/luckylew23/vercel-proxy.git"
-  },
-  "keywords": [
-    "vercel",
-    "proxy",
-    "tencent-cloud",
-    "scf",
-    "serverless"
-  ],
-  "author": "luckylew23-Mila",
-  "license": "MIT",
-  "devDependencies": {
-    "serverless-tencent": "^3.1.0"
-  }
+  "license": "MIT"
 }

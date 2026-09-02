@@ -1,0 +1,5 @@
+{
+  "targetHost": "https://api.example.com",
+  "timeout": 10000,
+  "cors": "*"
+}
