@@ -11,7 +11,7 @@
          timeout: 30
           environment:
             variables:
-             TARGET_HOST: your-project.vercel.app # 【重要】请修改这里为你的 Vercel 域名
+             TARGET_HOST: api-enhanced-39hyfqlo3-luckylew23s-projects.vercel.app # 【重要】请修改这里为你的 Vercel 域名
           events:
            - apigw:
                name: api
