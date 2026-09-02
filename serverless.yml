@@ -1,31 +1,25 @@
-        component: scf   
-        name: vercel-proxy-app     
-        inputs:
-         name: vercel-proxy       
-         src: ./       
-         handler: index.main_handler       
-         runtime: Nodejs16.13       
-         region: ap-guangzhou # 建议选离你最近的区域，如上海(ap-shanghai)或广州(ap-guangzhou)       
-         description: Vercel Proxy Serverless Function       
-         memorySize: 64 # 代理不需要大内存，64MB 足够，省钱       
-         timeout: 30
-          environment:
-            variables:
-             TARGET_HOST: api-enhanced-39hyfqlo3-luckylew23s-projects.vercel.app # 【重要】请修改这里为你的 Vercel 域名
-          events:
-           - apigw:
-               name: api
-                parameters:
-                  protocols:
-                   - https
-                 serviceName: vercel-proxy-service
-                 description: Vercel Proxy API Gateway       
-                 environment: release
-                  endpoints:       
-                   - path: /       
-                     method: ANY       
-                     enableCORS: true
-                      param:
-                       - name: path
-                         position: PATH
-                         type: string
+component: scf
+name: vercel-proxy-app
+
+inputs:
+  name: vercel-proxy
+  src: ./
+  handler: index.main_handler
+  runtime: Nodejs12.16
+  region: ap-guangzhou
+  description: Vercel API Proxy
+  memorySize: 64
+  timeout: 10
+  excludes:
+    - node_modules/**
+    - .git/**
+    - .env
+    - .env.example
+    - README.md
+  environment:
+    variables:
+      TARGET_HOST: ${env:TARGET_HOST}
+  events:
+    - functionUrl:
+        parameters:
+          authType: NONE
