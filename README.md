@@ -1,80 +1,183 @@
-# vercel-proxy
-# Vercel Serverless Proxy (腾讯云 SCF 版)
-        这是一个基于腾讯云云函数 (SCF) 和 API 网关构建的高性能反向代理项目。它旨在解决国内网络环境访问 Vercel 部署的应用（Web 或 API）时出现的连接超时、速度慢或被阻断的问题。
-        本项目不仅包含核心代理逻辑，还集成了 **Serverless Framework** 自动化部署配置，支持一键发布到云端。
-        ---
-        ##  项目目录结构
-        请在本地创建一个文件夹（例如 `vercel-proxy`），并在其中创建以下 5 个文件：
-        
- vercel-proxy/
-        ├── .gitignore            # Git 忽略配置      
-        ├── index.js              # 云函数核心入口代码      
-        ├── package.json          # Node.js 依赖配置
-        ├── serverless.yml        # 腾讯云 Serverless 部署配置
-        └── README.md             # 本说明文档
+# Vercel Proxy — 腾讯云 SCF 纯 API 代理
 
+零依赖的轻量级反向代理，部署在腾讯云云函数 (SCF) 上，通过函数 URL 触发，将请求转发到 Vercel 应用。解决国内直连 Vercel 延迟高、超时或被阻断的问题。
 
-# Vercel Serverless Proxy
+## 部署信息
 
- 一个极简的 Serverless 反向代理，基于腾讯云 SCF (Serverless Cloud Function) 构建。旨在解决国内网络环境下直连 Vercel 部署的 API 或前端应用延迟高、连接超时或被拦截的问题。
+| 项目 | 值 |
+|------|-----|
+| 运行环境 | Node.js 12.16 |
+| 入口文件 | `index.js` |
+| 执行方法 | `index.main_handler` |
+| 触发方式 | 函数 URL（免鉴权） |
+| 内存 | 64MB |
+| 超时 | 10s |
+| 运行时依赖 | 零（仅用 Node 原生 `https` 模块） |
 
-##  特性
-- **零依赖**：仅使用 Node.js 原生 `https` 模块，冷启动极速。
-- **Serverless**：基于腾讯云函数，免运维，按请求量计费，个人使用几乎零成本。
-- **动态配置**：支持通过环境变量配置目标域名，无需修改代码即可切换代理目标。
-- **全量转发**：完美支持 GET/POST 等所有 HTTP 方法，自动转发 Headers 和 Body。
+## 文件结构
 
-## ️ 部署指南
-### 1. 克隆项目
-```bash
-git clone https://github.com/你的用户名/vercel-serverless-proxy.git
 ```
-### 2. 部署到腾讯云
-1. 登录 腾讯云控制台，进入“云函数 SCF”。
-2. 点击“新建”，函数类型务必选择 **Web函数**，运行环境选择 `Node.js 16.x` 或以上。
-3. 将 `index.js` 代码粘贴到在线编辑器中，或将整个项目文件夹打包上传。
-4. 在“环境变量”配置中，添加键 `VERCEL_TARGET_HOST`，值填入你的 Vercel 域名（例如：`my-app.vercel.app`）。
-5. 点击“部署”。
-### 3. 开启公网访问
-在函数的“触发管理”中，添加 **API 网关触发器**，并勾选“开启公网访问”。部署成功后即可获得公网访问地址。
-## ️ 注意事项
-- 请确保您的 Vercel 项目本身在海外可以正常访问。
-- 如果您的 Vercel 应用有复杂的 CORS 策略，可能需要在 Vercel 端配置允许腾讯云 API 网关的跨域请求。
-- 建议为 API 网关绑定自定义域名，以获得更稳定的访问体验。
+vercel-proxy/
+├── index.js        # 代理逻辑（唯一源文件，零依赖）
+├── package.json    # 元信息
+├── serverless.yml  # Serverless Framework 部署配置
+├── .env.example    # 环境变量模板
+├── .gitignore
+├── LICENSE
+└── README.md
+```
+
+---
+
+## 部署方式一：CLI 从 GitHub 拉取部署（推荐）
+
+### 第 1 步：克隆仓库
+
+```bash
+git clone https://github.com/luckylew23/vercel-proxy.git
+cd vercel-proxy
+```
+
+### 第 2 步：安装 Serverless Framework
+
+```bash
+npm install -g serverless
+```
+
+### 第 3 步：配置腾讯云凭证
+
+在 [腾讯云 API 密钥管理](https://console.cloud.tencent.com/cam/capi) 获取 `SecretId` 和 `SecretKey`，然后执行：
+
+```bash
+sls config set --secretId your-secret-id --secretKey your-secret-key
+```
+
+### 第 4 步：配置目标域名
+
+复制环境变量模板并编辑：
+
+```bash
+cp .env.example .env
+```
+
+打开 `.env` 文件，将 `TARGET_HOST` 改为你的 Vercel 域名：
+
+```env
+TARGET_HOST=my-app.vercel.app
+```
+
+> `.env` 已被 `.gitignore` 忽略，不会提交到仓库。域名不含 `https://`，只填主机名。
+
+### 第 5 步：部署
+
+```bash
+sls deploy
+```
+
+部署成功后，终端输出类似：
+
+```
+  functionUrl: https://vercel-proxy-xxxxx.ap-guangzhou.function.tencentyun.com/
+```
+
+这个 URL 就是你的代理地址，所有请求会被转发到你的 Vercel 应用。
+
+### 第 6 步：验证
+
+```bash
+# 替换为你的函数 URL
+curl https://vercel-proxy-xxxxx.ap-guangzhou.function.tencentyun.com/api/users
+```
+
+应返回与直接访问 `https://my-app.vercel.app/api/users` 相同的内容。
+
+### 移除部署
+
+```bash
+sls remove
+```
+
+---
+
+## 部署方式二：腾讯云控制台手动部署
+
+### 第 1 步：下载代码
+
+从 [GitHub 仓库](https://github.com/luckylew23/vercel-proxy) 下载 ZIP 或克隆代码，只需要 `index.js` 一个文件。
+
+### 第 2 步：创建函数
+
+1. 登录 [腾讯云 SCF 控制台](https://console.cloud.tencent.com/scf)
+2. 点击 **新建**
+3. 函数类型选 **Web 函数**
+4. 函数名称填 `vercel-proxy`
+5. 运行环境选 **Node.js 12.16**
+6. **执行方法** 填 `index.main_handler`
+7. 上传方式选 **本地上传**，选择 `index.js` 文件
+8. 点击 **下一步**
+
+### 第 3 步：配置环境变量
+
+在 **函数配置 → 环境变量** 中添加：
+
+| 键 | 值 |
+|----|-----|
+| `TARGET_HOST` | `my-app.vercel.app` |
+
+> 替换为你的 Vercel 域名，不含 `https://`。
+
+### 第 4 步：调整资源配置
+
+| 配置项 | 值 |
+|--------|-----|
+| 内存 | 64MB |
+| 执行超时 | 10 秒 |
+
+### 第 5 步：完成创建
+
+点击 **完成**，等待部署完成（状态变为「部署成功」）。
+
+### 第 6 步：开启函数 URL
+
+1. 进入函数详情 → **触发管理**
+2. 点击 **函数 URL** → **创建**
+3. 鉴权方式选 **免鉴权**
+4. 点击保存，获得函数 URL 地址
+
+### 第 7 步：验证
+
+用浏览器或 curl 访问函数 URL，请求会被代理到你的 Vercel 应用。
+
+---
+
+## 配置说明
+
+| 环境变量 | 必填 | 说明 | 示例 |
+|----------|------|------|------|
+| `TARGET_HOST` | 是 | 目标 Vercel 域名（不含 `https://` 和路径） | `my-app.vercel.app` |
+
+- **CLI 部署**：写在 `.env` 文件中，`serverless.yml` 通过 `${env:TARGET_HOST}` 引用
+- **控制台部署**：在函数的环境变量配置界面直接填写
+- **未配置时**：函数返回 HTTP 500 + `{"error":"TARGET_HOST is not set"}`，不会静默失败
+
+---
+
+## 特性
+
+- **零依赖** — 仅用 Node.js 原生 `https` 模块，冷启动 < 100ms
+- **全方法** — GET / POST / PUT / DELETE / PATCH / OPTIONS
+- **CORS 预检** — OPTIONS 请求直接返回 204，不转发到目标
+- **二进制安全** — 响应体 base64 编码传输，支持图片、字体、文件等
+- **重定向重写** — 自动将 Location 头改写为相对路径，防止客户端绕过代理直连目标
+- **超时保护** — 10s 超时，慢请求不会卡死函数
+
+## 注意事项
+
+- 确保你的 Vercel 项目在海外可正常访问
+- 函数 URL 免鉴权，任何人可访问，请勿用于敏感接口
+- 如需鉴权，在 `serverless.yml` 中将 `authType` 改为 `FUNCTION`
+- 如需自定义域名，在 SCF 控制台 → 函数 URL → 域名配置 中绑定
+
 ## License
 
 MIT
-
-```
----
-
-### 5. `LICENSE` (MIT 开源协议)
-```text
-MIT License
-
-Copyright (c) 2024 Your Name
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
----
-
-### 下一步操作建议
-1. 将上述文件保存到您本地的 `vercel-serverless-proxy` 文件夹中。
-2. 将 `README.md` 中的 `你的用户名` 替换为您的真实 GitHub ID。
-3. 在终端执行以下命令推送到 GitHub：
