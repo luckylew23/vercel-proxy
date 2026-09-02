@@ -1,5 +1,5 @@
 {
-  "targetHost": "https://api.example.com",
+  "targetHost": "https://api-enhanced-smoky-one.vercel.app",
   "timeout": 10000,
   "cors": "*"
 }
